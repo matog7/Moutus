@@ -1,4 +1,4 @@
-# Moutus
+# Moutus (Projet perso en BUT)
 Jeu de Motus dans le terminal (en français)
 
 # Instruction jeu
