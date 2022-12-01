@@ -1,11 +1,10 @@
 # Moutus (Projet perso en BUT)
-Jeu de Motus dans le terminal (en français)
+Jeu de Motus dans le terminal (en français), avec utilisateurs et leaderboard !
 
 # Instruction jeu
-- 1 : Récuperer les classes 
-- 2 : Récuperer les fichiers Motus.java et jeuMotus.java 
-- 3 : Compiler les dans le terminal.
-- 4 : Lancer le jeu ! (avec la commande java si défini ou directement sur votre éditeur si possible) 
+- Créer votre compte 
+- Lancer le jeu ! 
 
+C'est aussi simple que ça.
 -------------------------------------------
 Le jeu a encore besoin d'améliorations. Créé par mes soins from scratch
