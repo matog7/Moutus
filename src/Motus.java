@@ -1,7 +1,6 @@
-package game;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Scanner;
-
 
 /*
  * Script that creates the motus game 
@@ -30,7 +29,7 @@ public class Motus {
      * @param mot the word to be added
      */ 
     public void addMots(String mot){
-        if (mot.length() < 5 && mot.length() > 11){
+        if (mot.length() < 5 && mot.length() > 10){
             System.out.println("ERREUR addMots() : il faut ajouter un mot avec au moins 5 lettres");
         } else {
             this.listeMots.add(mot);
@@ -54,34 +53,40 @@ public class Motus {
      * @return the array with the letters at the wrong place and the word actualize with the characters found, in a string
      */
     public String verifRep(String aTrouver, String rep){                
-        ArrayList<Character> lettre = new ArrayList<Character>();
-        String ret = "" + aTrouver.charAt(0);  //At the first start only the first letter is shown
+        ArrayList<Character> badChar = new ArrayList<>();
+        ArrayList<Character> goodChar = new ArrayList<>();
+        
+        //At the first start only the first letter is shown and add it to the goodChar array 
+        String ret = "\n" + aTrouver.charAt(0);  
+        goodChar.add(aTrouver.charAt(0));
 
-            for (int i = 1; i < aTrouver.length(); i++){
-                if (aTrouver.charAt(i) == rep.charAt(i)){
-                    ret = ret + rep.charAt(i);
-                }
-                else {
-                    ret = ret + "_";
-                    for (int j = 1; j < rep.length(); j++){
-                        if (aTrouver.charAt(i) == rep.charAt(j)){
-                            if (!lettre.contains(rep.charAt(j))){
-                                lettre.add(rep.charAt(j));
-                            }
-                            
+        for (int i = 1; i < aTrouver.length(); i++){
+            if (aTrouver.charAt(i) == rep.charAt(i)){
+                ret = ret + rep.charAt(i);
+                goodChar.add(rep.charAt(i));
+            }
+            else {
+                ret = ret + "_";
+                for (int j = 1; j < rep.length(); j++){
+                    if (aTrouver.charAt(i) == rep.charAt(j)){
+                        if (!badChar.contains(rep.charAt(j))){
+                            badChar.add(rep.charAt(j));
                         }
+                        
                     }
-                    
                 }
-                
             }
-            if (lettre.size() > 1){
-                ret = ret + " et les lettres "+ lettre.toString()+ " sont mal placees ou apparaissent plusieurs fois...";
-            } else if (lettre.size() == 0){
-                ret = ret + " essayez encore !";
-            } else {
-                ret = ret + " et la lettre "+ lettre.toString()+ " est mal placee ou apparait plusieurs fois...";
-            }
+        }
+
+        if (badChar.size() > 1){
+            ret = ret + " et les lettres "+ badChar.toString().replace("[", "").replace("]", "")+ " sont mal placees ou apparaissent plusieurs fois...";
+        } else if (goodChar.size() == aTrouver.length()){
+            ret = "\n* mou - mou - moutus ! *";
+        } else if (badChar.size() == 1){
+            ret = ret + " et la lettre "+ badChar.toString().replace("[", "").replace("]", "")+ " est mal placee ou apparait plusieurs fois...";
+        } else {
+            ret = ret + " essayez encore...";
+        }
             
         return ret;
     }
@@ -98,7 +103,7 @@ public class Motus {
      * Method that displays the game with a scanner in the shell.
      */
     public void displayJeu(){
-        System.out.println("\t -- MOUTUS --");
+        System.out.println("\n\t -- MOUTUS -- \n");
         Scanner sc = new Scanner(System.in);    // Creation of the scanner for the dialogue in the shell with the user
         int essai = 0;
         boolean end = false;
@@ -117,19 +122,19 @@ public class Motus {
             String rep = sc.nextLine();
             String ret = "";
             if (rep.length() < motATrouver.length() || rep.length() > motATrouver.length()){
-                System.out.println("Entrez un mot de la bonne taille");
+                System.out.println("\tEntrez un mot de la bonne taille.\n");
             } else {
                 essai += 1;
                 ret = verifRep(motATrouver, rep);
                 System.out.println(ret);
                 if (rep.equalsIgnoreCase(motATrouver)){
-                    System.out.println("Bravo ! vous avez trouvez "+ motATrouver +" en "+ essai +" essai(s)");
+                    System.out.println("\n\tBravo ! Vous avez trouvez "+ motATrouver +" en "+ essai +" essai(s).");
                     end = true;
                 }   
             }
         }
         if (essai == 6){
-            System.out.println("Echec !");
+            System.out.println("\n\tEchec ! Vous avez perdu, le mot etait "+ motATrouver +".");
         } else if (essai == 5){
             this.addScore(1);
         } else if (essai >= 3 == essai <= 4){
@@ -146,17 +151,25 @@ public class Motus {
     public void menu(){
         // MENU
         Scanner sc = new Scanner(System.in);
-        System.out.println("\t-- Que voulez vous faire ? -- \n\t\t - 1 : Score \n\t\t - 2 : Rejouer \n\t\t - 3 : Quitter");
+        System.out.println("\t\t-- Que voulez vous faire ? -- \n\t\t\t 1 : Score \n\t\t\t 2 : Rejouer \n\t\t\t 3 : Quitter");
         System.out.print("Votre choix : ");
-        int choice = sc.nextInt();
-        if (choice == 1){
-            System.out.println("Votre score d'aujourd'hui est de "+ this.score +" point(s)");
+        try {
+            int choice = sc.nextInt();
+            switch (choice){
+                case 1:
+                    System.out.println("Votre score est de "+ this.score+" points.\n");
+                    this.menu();
+                    break;
+                case 2:
+                    this.displayJeu();
+                    break;
+                case 3:
+                    System.out.println("Revenez demain !");
+                    break;
+            }
+        } catch (InputMismatchException e){
+            System.out.println("Choix non valide, réessayez.\n");
             this.menu();
-        } else if (choice == 2){
-            this.displayJeu();
-        } else if (choice == 3){
-            System.out.println("Revenez demain !");
         }
-
     }
 }

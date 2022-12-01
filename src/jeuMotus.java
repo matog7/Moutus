@@ -1,6 +1,5 @@
-package app;
+import java.sql.*;
 import java.util.ArrayList;
-import game.Motus;
 
 /*
  * Script that implements and runs the motus game 
@@ -14,6 +13,7 @@ public class jeuMotus {
         // Creation of the game structure
         Motus jeu = new Motus(list); 
 
+
         // Creation of the words 
         String mot = "Hello";String mot2 = "Coucou";String mot3 = "Bonjour";String mot4 = "Faisselle";String mot5 = "Chemin";
         String mot6 = "Concubines";String mot7 = "Taille";String mot8 = "Ministre";String mot9 = "Fabrique";String mot10 = "Cordillere";
@@ -25,7 +25,12 @@ public class jeuMotus {
         jeu.addMots(mot9);jeu.addMots(mot10);jeu.addMots(mot11);jeu.addMots(mot12);
         jeu.addMots(mot13);jeu.addMots(mot14);jeu.addMots(mot15);
 
+        // Creation of the connection to the database
+        Connect connect = new Connect(jeu);
+
         // Display the game
-        jeu.displayJeu();
+        // jeu.displayJeu();
+
+        connect.displayMenu();
     }
 }
