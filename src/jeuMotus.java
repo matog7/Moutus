@@ -11,8 +11,8 @@ public class jeuMotus {
         ArrayList<String> list = new ArrayList<String>();
         
         // Creation of the game structure
+       
         Motus jeu = new Motus(list); 
-
 
         // Creation of the words 
         String mot = "Hello";String mot2 = "Coucou";String mot3 = "Bonjour";String mot4 = "Faisselle";String mot5 = "Chemin";
@@ -31,6 +31,6 @@ public class jeuMotus {
         // Display the game
         // jeu.displayJeu();
 
-        connect.displayMenu();
+        connect.displayHome();
     }
 }

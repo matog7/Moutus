@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.io.*;
+import java.sql.*;
 
 /*
  * Script that creates the motus game 
@@ -9,6 +11,7 @@ import java.util.Scanner;
 
 public class Motus {
     private ArrayList<String> listeMots;
+    private Connect con = new Connect(this);
     private int score = 0;
 
     /**
@@ -94,15 +97,44 @@ public class Motus {
     /**
      * Method that adds point(s) to the score.
      * @param s point(s) scored
+     * @throws SQLException
      */
-    public void addScore(int s){
-        this.score = this.score + s;
+    public void addScore(int s, String user) {
+        try {
+            Connection connect = con.getConnection();
+            Statement stmt = connect.createStatement();
+            String sql = "UPDATE users SET score = score + "+s+" WHERE username LIKE '"+user+"';";
+            stmt.executeUpdate(sql);
+        } catch (SQLException e){
+            System.out.println("ERREUR update score.");
+        }
+    }
+    
+    /**
+     * Method that retrieves the amount of point(s) an user have
+     * @param user the username
+     * @return point(s), -1 if there is any error thrown
+     */
+    public int getScore(String user){
+        int ret = -1;
+        try{
+            Connection connect = con.getConnection();
+            Statement st = connect.createStatement();
+            ResultSet rs = st.executeQuery("SELECT score FROM users WHERE username LIKE '"+user+"';");
+            while (rs.next()){
+                ret = rs.getInt("score");
+            }
+        } catch (SQLException e){
+            System.out.println("ERREUR recupertion du total de points de "+user);
+        }
+        return ret;
     }
 
     /**
      * Method that displays the game with a scanner in the shell.
+     * @param user the username of the user connected to the game
      */
-    public void displayJeu(){
+    public void displayJeu(String user){
         System.out.println("\n\t -- MOUTUS -- \n");
         Scanner sc = new Scanner(System.in);    // Creation of the scanner for the dialogue in the shell with the user
         int essai = 0;
@@ -136,19 +168,19 @@ public class Motus {
         if (essai == 6){
             System.out.println("\n\tEchec ! Vous avez perdu, le mot etait "+ motATrouver +".");
         } else if (essai == 5){
-            this.addScore(1);
+            this.addScore(1, user);
         } else if (essai >= 3 == essai <= 4){
-            this.addScore(3);
+            this.addScore(3, user);
         } else if (essai >= 1 == essai <= 2){
-            this.addScore(5);
+            this.addScore(5, user);
         }
-        this.menu();
+        this.menu(user);
     }
 
     /**
      * Method that displays the user's menu at the end of the game, again with a scanner in the shell.
      */
-    public void menu(){
+    public void menu(String user){
         // MENU
         Scanner sc = new Scanner(System.in);
         System.out.println("\t\t-- Que voulez vous faire ? -- \n\t\t\t 1 : Score \n\t\t\t 2 : Rejouer \n\t\t\t 3 : Quitter");
@@ -157,19 +189,20 @@ public class Motus {
             int choice = sc.nextInt();
             switch (choice){
                 case 1:
-                    System.out.println("Votre score est de "+ this.score+" points.\n");
-                    this.menu();
+                    System.out.println("Votre score est de "+ this.getScore(user)+" points.\n");
+                    this.menu(user);
                     break;
                 case 2:
-                    this.displayJeu();
+                    this.displayJeu(user);
                     break;
                 case 3:
                     System.out.println("Revenez demain !");
+                    this.con.displayMenu(user);
                     break;
             }
         } catch (InputMismatchException e){
             System.out.println("Choix non valide, réessayez.\n");
-            this.menu();
+            this.menu(user);
         }
     }
 }

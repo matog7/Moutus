@@ -1,3 +1,4 @@
+import java.io.*;
 import java.sql.*;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -22,6 +23,10 @@ public class Connect {
         }
     }
 
+    /**
+     * Method to gets the connection
+     * @return the connection to the database of users
+     */
     public Connection getConnection(){
         return this.con;
     }
@@ -44,25 +49,6 @@ public class Connect {
     }
 
     /**
-     * Method that displays the users of the game registered in the database
-    */
-    public void displayUsers(){
-        try{
-            Connection con = this.getConnection();
-            Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM users");
-            while (rs.next()){
-                System.out.print(rs.getString("username")+ " ");
-                System.out.print(rs.getString("password")+ " ");
-                System.out.print(rs.getInt("score")+ " ");
-                System.out.println(rs.getString("role"));
-            }
-        } catch (Exception e) {
-            System.out.println("Affichage échoué"+ e);
-        }
-    }
-
-    /**
      * Connection method for the user
      * @param username the name of the user, written in the shell
      * @param password the password of the user, written in the shell
@@ -73,12 +59,12 @@ public class Connect {
         try{
             Connection con = this.getConnection();
             Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery("SELECT COUNT(*) as user FROM users WHERE UPPERCASE(username) = "+username+" AND  UPPERCASE(password) = "+password);
-            if (rs.getString("user").equals("1")){
+            ResultSet rs = st.executeQuery("SELECT COUNT(*) as user FROM users WHERE username = '"+username+"' AND  password = '"+password+"';");
+            if (rs.next() && rs.getInt("user") == 1){
                 ret = 1;
             }
         } catch (Exception e) {
-            System.out.print("User "+username+" connection try failed");
+            System.out.print("User '"+username+"' connection try failed, "+e);
         }
         return ret;
     }
@@ -93,9 +79,9 @@ public class Connect {
         try {
             Connection con = this.getConnection();
             Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery("SELECT username, role FROM users WHERE username LIKE '"+username+"';");
+            ResultSet rs = st.executeQuery("SELECT role FROM users WHERE username LIKE '"+username+"';");
             while (rs.next()){
-                ret = rs.getString("username")+ " : "+ rs.getString("role");
+                ret = rs.getString("role");
             }
         } catch (Exception e) {
             System.out.print("User "+ username +" does not exist."+ e);
@@ -125,26 +111,28 @@ public class Connect {
         return check;
     }
 
+    // -------------------------------- ALL THE DISPLAY SCRIPTS -------------------------------- //
+
+
     /**
      * Method that displays the home menu
      */
-    public void displayMenu(){
-        System.out.println("JDBC test");
+    public void displayHome(){
+        System.out.println(" - Jeux.com - ");
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("\t\t-- Que voulez vous faire ? -- \n\t\t\t 1 : Créer un compte \n\t\t\t 2 : afficher users \n\t\t\t 3 : Quitter");
+        System.out.println("\t-- Que voulez vous faire ? -- \n\t\t 1 : Créer un compte \n\t\t 2 : Se connecter \n\t\t 3 : Quitter");
         System.out.print("Votre choix : ");
         try {
             int choice = sc.nextInt();
             switch (choice){
                 case 1:
-                    System.out.println("creation de compte");
-                    this.createAccount();
+                    System.out.println("Acces a la creation de compte..");
+                    this.signUpDisplay();
                     break;
                 case 2:
-                    System.out.println("Users list : ");
-                    this.displayUsers();
-                    //this.connection();
+                    System.out.println("Acces a la connexion..");
+                    this.connectionDisplay();
                     break;
                 case 3:
                     System.out.println("See ya !");
@@ -152,11 +140,11 @@ public class Connect {
             }
         } catch (InputMismatchException e){
             System.out.println("Choix non valide, réessayez.\n");
-            this.displayMenu();
+            this.displayHome();
         }
     }
 
-    public void createAccount(){
+    public void signUpDisplay(){
         System.out.println("\n - Sign Up - ");
         Scanner sc = new Scanner(System.in);
         System.out.print("Username : ");
@@ -166,36 +154,145 @@ public class Connect {
         boolean ok = this.newAccount(user, pass);
         if (ok){
             System.out.println("Acces au menu...");
-            this.displayAccount(user);
+            this.displayMenu(user);
         } else {
             System.out.println("retour au menu d'accueil");
+            this.displayHome();
         }
     }
 
-    public void displayAccount(String username){
-        System.out.println(" - Bienvenue "+username+" - ");
+    public void connectionDisplay(){
+        System.out.println("\n - Connection - ");
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("\t\t-- Que voulez vous faire ? -- \n\t\t\t 1 : Mes Informations \n\t\t\t 2 : Lancer Moutus \n\t\t\t 3 : Déconnexion");
+        Console console = System.console();
+        String user = "";
+        String pass = "";
+
+        user = console.readLine("Entrez votre nom d'utilisateur: ");
+        pass = new String(console.readPassword("Entrez votre mot de passe: "));
+        
+        int connect = this.connection(user, pass);
+        if (connect == 1){
+            System.out.println("Connexion en cours..");
+            this.displayMenu(user);
+        } else {
+            System.out.println("Mauvais identifiant ou mot de passe. Reesayez.");
+            this.connectionDisplay();
+        }
+    }
+
+    public void displayMenu(String user){
+        System.out.println("\n - Bienvenue "+user+" - ");
+        Scanner sc = new Scanner(System.in);
+
+        if (this.getRole(user).equalsIgnoreCase("admin")){
+            this.displayAdmin(user);
+        } else {
+            System.out.println("\t-- Que voulez vous faire ? -- \n\t\t 1 : Lancer Moutus \n\t\t 2 : Leaderboard \n\t\t 3 : Mes informations \n\t\t\t 4 : Deconnexion");
+            System.out.print("Votre choix : ");
+            try {
+                int display = sc.nextInt();
+                switch (display){
+                    case 1:
+                        System.out.println("Chargement de Moutus..");
+                        this.game.displayJeu(user);
+                        break;
+                    case 2:
+                        System.out.println("Acces au leaderboard..");
+                        this.displayLeaderboard(user);
+                        break;
+                    case 3:
+                        System.out.println("Acces a vos informations en cours..");
+                        break;
+                    case 4:
+                        System.out.println("See ya !");
+                        break;
+                }
+            } catch (InputMismatchException e){
+                System.out.println("Choix non valide, réessayez.\n");
+                this.displayHome();
+            }
+        }
+    }
+
+    public void displayAdmin(String user){
+        Scanner sc = new Scanner(System.in);
+        System.out.println("\t-- Que voulez vous faire ? -- \n\t\t 1 : Lancer Moutus \n\t\t 2 : Leaderboard \n\t\t 3 : Mes informations"
+                + "\n\t\t 4 : Ajout utilisateur \n\t\t 5 : Modifier role utilisateur \n\t\t 6 : Deconnexion");
         System.out.print("Votre choix : ");
         try {
-            int choice = sc.nextInt();
-            switch (choice){
+            int display = sc.nextInt();
+            switch (display){
                 case 1:
-                    System.out.println("Infos");
+                    System.out.println("Chargement de Moutus..");
+                    this.game.displayJeu(user);
                     break;
                 case 2:
-                    System.out.println("Chargement...");
-                    this.game.displayJeu();
+                    System.out.println("Acces au leaderboard..");
+                    this.displayLeaderboard(user);
                     break;
                 case 3:
-                    System.out.println("Revenez vite !");
+                    System.out.println("Acces a vos informations en cours..");
+                    break;
+                case 4:
+                    System.out.println("Ajout utilisateur en developpement..");
+                    break;
+                case 5:
+                    System.out.println("Maj role utilisateur en developpement..");
+                    break;
+                case 6:
+                    System.out.println("See ya !");
                     break;
             }
         } catch (InputMismatchException e){
             System.out.println("Choix non valide, réessayez.\n");
-            this.displayMenu();
+            this.displayHome();
         }
+    }
+
+    /**
+     * Method that displays the users of the game registered in the database
+    */
+    public void displayLeaderboard(String user){
+        System.out.println("\n - Leaderboard Moutus - ");
+        int i = 1;
+        try{
+            Connection con = this.getConnection();
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery("SELECT username, score FROM users ORDER BY score DESC");
+            while (rs.next()){
+                if (rs.getString("username").equals(user)){
+                    System.out.print(i + " - "+rs.getString("username")+ " (vous), ");
+                } else {
+                    System.out.print(i + " - "+rs.getString("username")+ ", ");
+                }
+                System.out.print(rs.getInt("score")+ "\n");
+                i++;
+            }
+        } catch (Exception e) {
+            System.out.println("Affichage échoué"+ e);
+        }
+        this.displayMenu(user);
+    }
+
+
+    public void displayInfo(String user){
+        System.out.println("\n - Vos informations - ");
+        int i = 1;
+        try{
+            Connection con = this.getConnection();
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery("SELECT * FROM users WHERE username LIKE '"+user+"';");
+            while (rs.next()){
+                System.out.println("\nVotre nom d'utilisateur : "+rs.getString("username"));
+                System.out.println("\nVotre mot de passe : "+rs.getString("password"));
+                System.out.println("\nVotre score total : "+rs.getString("score"));
+            }
+        } catch (Exception e) {
+            System.out.println("Affichage échoué"+ e);
+        }
+        this.displayMenu(user);
     }
 
 }
