@@ -184,25 +184,36 @@ public class Motus {
         // MENU
         Scanner sc = new Scanner(System.in);
         System.out.println("\t\t-- Que voulez vous faire ? -- \n\t\t\t 1 : Score \n\t\t\t 2 : Rejouer \n\t\t\t 3 : Quitter");
-        System.out.print("Votre choix : ");
-        try {
-            int choice = sc.nextInt();
-            switch (choice){
-                case 1:
-                    System.out.println("Votre score est de "+ this.getScore(user)+" points.\n");
-                    this.menu(user);
-                    break;
-                case 2:
-                    this.displayJeu(user);
-                    break;
-                case 3:
-                    System.out.println("Revenez demain !");
-                    this.con.displayMenu(user);
-                    break;
+        boolean valid = false;
+
+        while (!valid){
+            System.out.print("Votre choix : ");
+            try {
+                int choice = sc.nextInt();
+                switch (choice){
+                    case 1:
+                        valid = true;
+                        System.out.println("Votre score est de "+ this.getScore(user)+" points.\n");
+                        this.menu(user);
+                        break;
+                    case 2:
+                        valid = true;
+                        this.displayJeu(user);
+                        break;
+                    case 3:
+                        valid = true;
+                        System.out.println("Revenez demain !");
+                        this.con.displayMenu(user);
+                        break;
+                }
+                if (choice <= 0 || choice > 3){
+                    System.out.println("Choix non valide, réessayez.\n");
+                }
+            } catch (InputMismatchException e){
+                System.out.println("Choix non valide, réessayez.\n");
+                this.menu(user);
             }
-        } catch (InputMismatchException e){
-            System.out.println("Choix non valide, réessayez.\n");
-            this.menu(user);
         }
+        
     }
 }
