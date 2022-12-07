@@ -3,16 +3,16 @@ import java.sql.*;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-public class Connect {
+public class ConnectAndMenu {
 
     private Connection con = null;
     private Motus game = null;
     public boolean display = true;
 
     /**
-     * Method that builds a connection to the database
+     * Method that builds a connection to the database and initialize the user's menu (with actions on the database available)
      */
-    public Connect(Motus motus){
+    public ConnectAndMenu(Motus motus){
         // connection to jdbc database
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -114,6 +114,12 @@ public class Connect {
         return check;
     }
 
+    /**
+     * Method that updates the role of the given user 
+     * @param username the user's username
+     * @param role his new role
+     * @return true if ok, false otherwise
+     */
     public boolean updateRole(String username, String role){
         boolean check = true;
         try {
@@ -135,7 +141,7 @@ public class Connect {
      * Method that displays the home menu
      */
     public void displayHome(){
-        System.out.println("\n\t   - Jeux.com - \n");
+        System.out.println("\n\t- GameShell.java - \n");
         Scanner sc = new Scanner(System.in);
         boolean run = true;
         System.out.println("      Que voulez vous faire ?"
@@ -174,6 +180,9 @@ public class Connect {
         
     }
 
+    /**
+     * Method that displays the sign-up menu
+     */
     public void signUpDisplay(){
         System.out.println("\n\t - Sign Up - ");
 
@@ -203,6 +212,9 @@ public class Connect {
         
     }
 
+    /**
+     * Method that displays the connection menu
+     */
     public void connectionDisplay(){
         System.out.println("\n\t - Connection - ");
 
@@ -223,6 +235,11 @@ public class Connect {
         }
     }
 
+
+    /**
+     * Method that chooses the menu to display, depending on the user's role
+     * @param user the username of the connected user
+     */
     public void displayMenu(String user){
         Scanner sc = new Scanner(System.in);
 
@@ -239,6 +256,10 @@ public class Connect {
         }
     }
 
+    /**
+     * Method that displays a menu for the simple users (role : player)
+     * @param user the username of the connected user
+     */
     public void displayUser(String user){
         Scanner sc = new Scanner(System.in);
         boolean run = true;
@@ -285,6 +306,10 @@ public class Connect {
         }
     }
 
+    /**
+     * Method that displays a menu for the admin users (role : admin), with more rights for the master user.
+     * @param user the username of the connected user
+     */
     public void displayAdmin(String user){
         Scanner sc = new Scanner(System.in);
         boolean run = true;
@@ -344,8 +369,9 @@ public class Connect {
     }
 
     /**
-     * Method that displays the users of the game registered in the database
-    */
+     * Method that displays the users of the game registered in the database, order by their score
+     * @param user the username of the connected user (in order to go back to the main menu and keeping the connection)
+     */
     public void displayLeaderboard(String user){
         System.out.println("\n       - Leaderboard Moutus - \n");
         int i = 1;
@@ -368,6 +394,10 @@ public class Connect {
         this.goBack(user);
     }
 
+    /**
+     * Method that displays the infos about your user account
+     * @param user the username of the connected user 
+     */
     public void displayInfo(String user){
         System.out.println("\n     - Vos informations - ");
         try{
@@ -385,6 +415,10 @@ public class Connect {
         this.goBack(user);
     }
 
+    /**
+     * Method that displays a 'form' in order to add a new player to the game's database (admin and master only)
+     * @param user the username of the connected user (in order to go back to the main menu and keeping the connection)
+     */
     public void displayAdd(String user){
         System.out.println("\n       - Ajout - ");
         Scanner sc = new Scanner(System.in);
@@ -410,6 +444,10 @@ public class Connect {
         }
     }
 
+    /**
+     * Method that displays a 'form' in order to update a player's role (admin and master only)
+     * @param user the username of the connected user (in order to go back to the main menu and keeping the connection)
+     */
     public void displayUpdate(String user){
         Scanner sc = new Scanner(System.in);
         System.out.println("\n     - MAJ role - ");
@@ -461,6 +499,10 @@ public class Connect {
         }
     }
 
+    /**
+     * Method that displays a quick scanner in order to go back to the main menu
+     * @param user the username of the connected user (in order to go back to the main menu and keeping the connection)
+     */
     public void goBack(String user){
         Scanner sc = new Scanner(System.in);
         System.out.print("\nEntrez 'r' pour revenir au menu : ");
