@@ -7,4 +7,5 @@ Jeu de Motus dans le terminal (en français), avec utilisateurs et leaderboard !
 
 C'est aussi simple que ça.
 -------------------------------------------
-Le jeu a encore besoin d'améliorations. Créé par mes soins from scratch
+Le jeu a encore besoin d'améliorations. Créé par mes soins.
+_code et documentation en Anglais_
