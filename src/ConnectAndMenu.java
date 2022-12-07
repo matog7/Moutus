@@ -23,7 +23,7 @@ public class ConnectAndMenu {
         }
     }
 
-    /**
+    /** 
      * Method to gets the connection
      * @return the connection to the database of users
      */
